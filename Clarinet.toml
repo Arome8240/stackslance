@@ -1,0 +1,15 @@
+[project]
+name = "stackslance"
+description = "Decentralized Freelance Marketplace on Stacks"
+authors = []
+telemetry = false
+cache_dir = "./.clarinet"
+
+[contracts.freelance-marketplace]
+path = "contracts/freelance-marketplace.clar"
+clarity_version = 2
+epoch = "2.5"
+
+[repl.analysis]
+passes = ["check_checker"]
+check_checker = { trusted_sender = false, trusted_caller = false, callee_filter = false }
