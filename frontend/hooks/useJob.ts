@@ -68,6 +68,7 @@ export function useJobs() {
           Array.from({ length: count }, (_, i) =>
             getJob(i + 1).then(async (raw) => {
               if (!raw) return null;
+              console.log("raw job", i + 1, raw);
               const job = parseJob(i + 1, raw as Record<string, unknown>);
               try {
                 job.meta = await fetchFromIPFS<JobMeta>(job.descriptionHash);
