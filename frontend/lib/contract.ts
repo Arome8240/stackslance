@@ -7,6 +7,7 @@ import {
   boolCV,
   ClarityValue,
   makeStandardSTXPostCondition,
+  makeContractSTXPostCondition,
   FungibleConditionCode,
 } from "@stacks/transactions";
 import { openContractCall } from "@stacks/connect";
@@ -159,8 +160,30 @@ export function submitWork(
   );
 }
 
-export function approveWork(jobId: number, callbacks: TxCallbacks) {
-  contractCall("approve-work", [uintCV(jobId)], callbacks);
+export function approveWork(
+  jobId: number,
+  amountMicroStx: number,
+  freelancer: string,
+  callbacks: TxCallbacks,
+) {
+  const postConditions = [
+    makeContractSTXPostCondition(
+      CONTRACT_ADDRESS,
+      CONTRACT_NAME,
+      FungibleConditionCode.Equal,
+      BigInt(amountMicroStx),
+    ),
+  ];
+  openContractCall({
+    contractAddress: CONTRACT_ADDRESS,
+    contractName: CONTRACT_NAME,
+    functionName: "approve-work",
+    functionArgs: [uintCV(jobId)],
+    network: getNetwork(),
+    postConditions,
+    onFinish: callbacks.onFinish,
+    onCancel: callbacks.onCancel,
+  });
 }
 
 export function raiseDispute(jobId: number, callbacks: TxCallbacks) {
@@ -170,11 +193,26 @@ export function raiseDispute(jobId: number, callbacks: TxCallbacks) {
 export function resolveDispute(
   jobId: number,
   payFreelancer: boolean,
+  amountMicroStx: number,
+  recipient: string,
   callbacks: TxCallbacks,
 ) {
-  contractCall(
-    "resolve-dispute",
-    [uintCV(jobId), boolCV(payFreelancer)],
-    callbacks,
-  );
+  const postConditions = [
+    makeContractSTXPostCondition(
+      CONTRACT_ADDRESS,
+      CONTRACT_NAME,
+      FungibleConditionCode.Equal,
+      BigInt(amountMicroStx),
+    ),
+  ];
+  openContractCall({
+    contractAddress: CONTRACT_ADDRESS,
+    contractName: CONTRACT_NAME,
+    functionName: "resolve-dispute",
+    functionArgs: [uintCV(jobId), boolCV(payFreelancer)],
+    network: getNetwork(),
+    postConditions,
+    onFinish: callbacks.onFinish,
+    onCancel: callbacks.onCancel,
+  });
 }

@@ -10,8 +10,8 @@ import {
   approveWork,
   raiseDispute,
   assignFreelancer,
+  resolveDispute,
 } from "@/lib/contract";
-import TxStatus from "@/components/TxStatus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,13 +32,8 @@ import {
   DocumentUpload,
   Lock1,
 } from "iconsax-react";
-import { JOB_STATUS, IPFS_GATEWAY } from "@/lib/constants";
-
-type TxState = {
-  status: "idle" | "pending" | "success" | "error";
-  txId?: string;
-  error?: string;
-};
+import { JOB_STATUS, IPFS_GATEWAY, CONTRACT_ADDRESS } from "@/lib/constants";
+import { toast } from "sonner";
 
 const STATUS_VARIANT: Record<
   number,
@@ -61,7 +56,7 @@ export default function JobDetailPage({
   const jobId = parseInt(id);
   const router = useRouter();
 
-  const { job, loading } = useJob(jobId);
+  const { job, loading, refetch } = useJob(jobId);
   const { address, connect, isConnected } = useWallet();
   const hasApplied = useHasApplied(jobId, address);
   const applicantCount = useApplicantCount(jobId);
@@ -69,8 +64,8 @@ export default function JobDetailPage({
   const [proposal, setProposal] = useState("");
   const [submission, setSubmission] = useState("");
   const [freelancerAddr, setFreelancerAddr] = useState("");
-  const [tx, setTx] = useState<TxState>({ status: "idle" });
   const [uploading, setUploading] = useState(false);
+  const [pending, setPending] = useState(false);
 
   if (loading) {
     return (
@@ -93,13 +88,28 @@ export default function JobDetailPage({
   const stx = (job.amount / 1_000_000).toFixed(2);
   const isJobClient = address === job.client;
   const isJobFreelancer = address === job.freelancer;
-  const busy = uploading || tx.status === "pending";
+  const isArbitrator = address === CONTRACT_ADDRESS;
+  const busy = uploading || pending;
 
-  function callbacks() {
+  function callbacks(successMsg: string) {
     return {
-      onFinish: ({ txId }: { txId: string }) =>
-        setTx({ status: "success", txId }),
-      onCancel: () => setTx({ status: "idle" }),
+      onFinish: ({ txId }: { txId: string }) => {
+        setPending(false);
+        toast.success(successMsg, {
+          description: (
+            <a
+              href={`https://explorer.hiro.so/txid/${txId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              View on Explorer
+            </a>
+          ),
+        });
+        refetch();
+      },
+      onCancel: () => setPending(false),
     };
   }
 
@@ -114,11 +124,11 @@ export default function JobDetailPage({
         appliedAt: new Date().toISOString(),
       });
       setUploading(false);
-      setTx({ status: "pending" });
-      applyToJob(jobId, cid, callbacks());
+      setPending(true);
+      applyToJob(jobId, cid, callbacks("Proposal submitted!"));
     } catch (err) {
       setUploading(false);
-      setTx({ status: "error", error: (err as Error).message });
+      toast.error("Failed", { description: (err as Error).message });
     }
   }
 
@@ -133,19 +143,46 @@ export default function JobDetailPage({
         submittedAt: new Date().toISOString(),
       });
       setUploading(false);
-      setTx({ status: "pending" });
-      submitWork(jobId, cid, callbacks());
+      setPending(true);
+      submitWork(jobId, cid, callbacks("Work submitted!"));
     } catch (err) {
       setUploading(false);
-      setTx({ status: "error", error: (err as Error).message });
+      toast.error("Failed", { description: (err as Error).message });
     }
   }
 
   function handleAssign(e: React.FormEvent) {
     e.preventDefault();
     if (!isConnected) return connect();
-    setTx({ status: "pending" });
-    assignFreelancer(jobId, freelancerAddr, callbacks());
+    setPending(true);
+    assignFreelancer(jobId, freelancerAddr, callbacks("Freelancer assigned!"));
+  }
+
+  function handleApprove() {
+    setPending(true);
+    approveWork(
+      jobId,
+      job!.amount,
+      job!.freelancer!,
+      callbacks("Payment released!"),
+    );
+  }
+
+  function handleDispute() {
+    setPending(true);
+    raiseDispute(jobId, callbacks("Dispute raised."));
+  }
+
+  function handleResolve(payFreelancer: boolean) {
+    setPending(true);
+    const recipient = payFreelancer ? job!.freelancer! : job!.client;
+    resolveDispute(
+      jobId,
+      payFreelancer,
+      job!.amount,
+      recipient,
+      callbacks("Dispute resolved."),
+    );
   }
 
   return (
@@ -337,11 +374,10 @@ export default function JobDetailPage({
                       ? "Connect Wallet"
                       : uploading
                         ? "Uploading..."
-                        : busy
+                        : pending
                           ? "Confirm in wallet..."
                           : "Submit Proposal"}
                   </Button>
-                  <TxStatus {...tx} />
                 </form>
               )}
 
@@ -374,7 +410,6 @@ export default function JobDetailPage({
                     <UserAdd size={15} color="white" />
                     {busy ? "Confirm in wallet..." : "Assign Freelancer"}
                   </Button>
-                  <TxStatus {...tx} />
                 </form>
               )}
 
@@ -402,15 +437,14 @@ export default function JobDetailPage({
                     <DocumentUpload size={15} color="white" />
                     {uploading
                       ? "Uploading..."
-                      : busy
+                      : pending
                         ? "Confirm in wallet..."
                         : "Submit Work"}
                   </Button>
-                  <TxStatus {...tx} />
                 </form>
               )}
 
-              {/* Approve / dispute */}
+              {/* Approve / dispute (client) */}
               {job.status === 2 && isJobClient && (
                 <div className="mt-5 space-y-3">
                   <p className="text-sm font-semibold">Review Submission</p>
@@ -418,10 +452,7 @@ export default function JobDetailPage({
                     size="lg"
                     className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
                     disabled={busy}
-                    onClick={() => {
-                      setTx({ status: "pending" });
-                      approveWork(jobId, callbacks());
-                    }}
+                    onClick={handleApprove}
                   >
                     <TickCircle size={16} color="white" variant="Bold" />
                     {busy
@@ -433,18 +464,15 @@ export default function JobDetailPage({
                     variant="destructive"
                     className="w-full gap-2"
                     disabled={busy}
-                    onClick={() => {
-                      setTx({ status: "pending" });
-                      raiseDispute(jobId, callbacks());
-                    }}
+                    onClick={handleDispute}
                   >
                     <Warning2 size={16} color="white" variant="Bold" /> Raise
                     Dispute
                   </Button>
-                  <TxStatus {...tx} />
                 </div>
               )}
 
+              {/* Dispute (freelancer) */}
               {job.status === 2 && isJobFreelancer && (
                 <div className="mt-5 space-y-3">
                   <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-xs text-primary flex items-center gap-2">
@@ -456,15 +484,43 @@ export default function JobDetailPage({
                     variant="destructive"
                     className="w-full gap-2"
                     disabled={busy}
-                    onClick={() => {
-                      setTx({ status: "pending" });
-                      raiseDispute(jobId, callbacks());
-                    }}
+                    onClick={handleDispute}
                   >
                     <Warning2 size={16} color="white" variant="Bold" /> Raise
                     Dispute
                   </Button>
-                  <TxStatus {...tx} />
+                </div>
+              )}
+
+              {/* Arbitrator resolve */}
+              {job.status === 4 && isArbitrator && (
+                <div className="mt-5 space-y-3">
+                  <p className="text-sm font-semibold">Resolve Dispute</p>
+                  <Button
+                    size="lg"
+                    className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
+                    disabled={busy}
+                    onClick={() => handleResolve(true)}
+                  >
+                    <TickCircle size={16} color="white" variant="Bold" />
+                    {busy ? "Confirm in wallet..." : "Pay Freelancer"}
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full gap-2"
+                    disabled={busy}
+                    onClick={() => handleResolve(false)}
+                  >
+                    <ArrowRight2 size={16} color="#1d4ed8" /> Refund Client
+                  </Button>
+                </div>
+              )}
+
+              {job.status === 4 && !isArbitrator && (
+                <div className="mt-4 bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-sm text-destructive font-medium flex items-center gap-2">
+                  <Warning2 size={15} color="#dc2626" variant="Bold" /> Disputed
+                  — awaiting arbitration
                 </div>
               )}
 
@@ -472,12 +528,6 @@ export default function JobDetailPage({
                 <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-700 font-medium flex items-center gap-2">
                   <TickCircle size={15} color="#16a34a" variant="Bold" />{" "}
                   Completed — payment released
-                </div>
-              )}
-              {job.status === 4 && (
-                <div className="mt-4 bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-sm text-destructive font-medium flex items-center gap-2">
-                  <Warning2 size={15} color="#dc2626" variant="Bold" /> Disputed
-                  — awaiting arbitration
                 </div>
               )}
               {job.status === 5 && (
