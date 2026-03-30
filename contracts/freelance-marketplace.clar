@@ -6,7 +6,7 @@
 ;; -----------------------------------------------
 ;; Constants
 ;; -----------------------------------------------
-(define-constant ARBITRATOR 'SP25H46Z9YCAB1TW93YG42WM0SREG9SC5EZB977TJ) ;; replace with real arbitrator address
+(define-constant ARBITRATOR 'SP30B2R72X2HNZB589SNDX2XKKNMWZ8EEHR6Q68H6) ;; replace with real arbitrator address
 
 (define-constant ERR-NOT-FOUND          (err u100))
 (define-constant ERR-UNAUTHORIZED       (err u101))
@@ -75,11 +75,10 @@
 )
 
 (define-private (assert-status (job-id uint) (expected-status uint))
-  (match (get-job-or-err job-id)
-    job (if (is-eq (get status job) expected-status)
-            (ok job)
-            ERR-INVALID-STATE)
-    err err
+  (let ((job (try! (get-job-or-err job-id))))
+    (if (is-eq (get status job) expected-status)
+        (ok job)
+        ERR-INVALID-STATE)
   )
 )
 
