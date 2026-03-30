@@ -1,5 +1,7 @@
 "use client";
 import { useJobs } from "@/hooks/useJob";
+
+export const dynamic = "force-dynamic";
 import JobCard from "@/components/JobCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

@@ -1,6 +1,8 @@
 "use client";
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 import { useJob, useHasApplied, useApplicantCount } from "@/hooks/useJob";
 import { useWallet } from "@/hooks/useWallet";
 import { uploadToIPFS } from "@/lib/ipfs";
