@@ -48,15 +48,20 @@ function parsePrincipal(val: unknown): string | null {
 }
 
 function parseJob(id: number, raw: Record<string, unknown>): Job {
+  // cvToValue returns the whole tuple as { type, value: { field: { type, value } } }
+  const fields = (
+    raw.value && typeof raw.value === "object" ? raw.value : raw
+  ) as Record<string, unknown>;
+
   return {
     id,
-    client: parsePrincipal(raw.client) ?? "",
-    freelancer: parsePrincipal(raw.freelancer),
-    amount: Number(cv(raw.amount)),
-    status: Number(cv(raw.status)),
-    descriptionHash: (cv(raw["description-hash"]) as string) ?? "",
-    submissionHash: (cv(raw["submission-hash"]) as string) ?? null,
-    createdAt: Number(cv(raw["created-at"]) ?? 0),
+    client: parsePrincipal(fields.client) ?? "",
+    freelancer: parsePrincipal(fields.freelancer),
+    amount: Number(cv(fields.amount)),
+    status: Number(cv(fields.status)),
+    descriptionHash: (cv(fields["description-hash"]) as string) ?? "",
+    submissionHash: (cv(fields["submission-hash"]) as string) ?? null,
+    createdAt: Number(cv(fields["created-at"]) ?? 0),
   };
 }
 
