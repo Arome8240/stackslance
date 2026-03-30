@@ -68,7 +68,6 @@ export function useJobs() {
           Array.from({ length: count }, (_, i) =>
             getJob(i + 1).then(async (raw) => {
               if (!raw) return null;
-              console.log("raw job", i + 1, raw);
               const job = parseJob(i + 1, raw as Record<string, unknown>);
               try {
                 job.meta = await fetchFromIPFS<JobMeta>(job.descriptionHash);
@@ -94,9 +93,11 @@ export function useJobs() {
 export function useJob(id: number) {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     if (!id) return;
+    setLoading(true);
     async function load() {
       try {
         const raw = await getJob(id);
@@ -111,9 +112,9 @@ export function useJob(id: number) {
       }
     }
     load();
-  }, [id]);
+  }, [id, tick]);
 
-  return { job, loading, refetch: () => setLoading(true) };
+  return { job, loading, refetch: () => setTick((t) => t + 1) };
 }
 
 export function useHasApplied(jobId: number, address: string | null) {

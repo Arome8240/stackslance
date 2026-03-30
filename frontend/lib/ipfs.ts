@@ -25,5 +25,7 @@ export async function fetchFromIPFS<T>(cid: string): Promise<T> {
   if (!cid) throw new Error("Invalid CID");
   const res = await fetch(`${FETCH_GATEWAY}/ipfs/${cid}`);
   if (!res.ok) throw new Error(`IPFS fetch failed: ${res.statusText}`);
-  return res.json() as Promise<T>;
+  const json = await res.json();
+  // Pinata wraps uploads under pinataContent when using pinJSONToIPFS
+  return (json?.pinataContent ?? json) as T;
 }
