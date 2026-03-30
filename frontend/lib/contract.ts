@@ -1,10 +1,7 @@
 import {
   callReadOnlyFunction,
   cvToValue,
-  stringAsciiCV,
-  uintCV,
-  principalCV,
-  boolCV,
+  Cl,
   ClarityValue,
   makeStandardSTXPostCondition,
   makeContractSTXPostCondition,
@@ -31,7 +28,7 @@ async function readOnly(fn: string, args: ClarityValue[]) {
 }
 
 export async function getJob(jobId: number) {
-  return readOnly("get-job", [uintCV(jobId)]);
+  return readOnly("get-job", [Cl.uint(jobId)]);
 }
 
 export async function getJobCount(): Promise<number> {
@@ -39,29 +36,29 @@ export async function getJobCount(): Promise<number> {
 }
 
 export async function getJobStatus(jobId: number): Promise<number | null> {
-  return readOnly("get-job-status", [uintCV(jobId)]);
+  return readOnly("get-job-status", [Cl.uint(jobId)]);
 }
 
 export async function hasApplied(
   jobId: number,
   applicant: string,
 ): Promise<boolean> {
-  return readOnly("has-applied", [uintCV(jobId), principalCV(applicant)]);
+  return readOnly("has-applied", [Cl.uint(jobId), Cl.principal(applicant)]);
 }
 
 export async function getApplication(jobId: number, applicant: string) {
-  return readOnly("get-application", [uintCV(jobId), principalCV(applicant)]);
+  return readOnly("get-application", [Cl.uint(jobId), Cl.principal(applicant)]);
 }
 
 export async function getApplicantCount(jobId: number): Promise<number> {
-  return readOnly("get-applicant-count", [uintCV(jobId)]);
+  return readOnly("get-applicant-count", [Cl.uint(jobId)]);
 }
 
 export async function isClient(
   jobId: number,
   caller: string,
 ): Promise<boolean> {
-  return readOnly("is-client", [uintCV(jobId), principalCV(caller)]);
+  return readOnly("is-client", [Cl.uint(jobId), Cl.principal(caller)]);
 }
 
 export async function isAssignedFreelancer(
@@ -69,8 +66,8 @@ export async function isAssignedFreelancer(
   caller: string,
 ): Promise<boolean> {
   return readOnly("is-assigned-freelancer", [
-    uintCV(jobId),
-    principalCV(caller),
+    Cl.uint(jobId),
+    Cl.principal(caller),
   ]);
 }
 
@@ -116,7 +113,7 @@ export function createJob(
     contractAddress: CONTRACT_ADDRESS,
     contractName: CONTRACT_NAME,
     functionName: "create-job",
-    functionArgs: [stringAsciiCV(descriptionHash), uintCV(amountMicroStx)],
+    functionArgs: [Cl.stringAscii(descriptionHash), Cl.uint(amountMicroStx)],
     network: getNetwork(),
     postConditions,
     onFinish: callbacks.onFinish,
@@ -131,7 +128,7 @@ export function applyToJob(
 ) {
   contractCall(
     "apply-to-job",
-    [uintCV(jobId), stringAsciiCV(proposalHash)],
+    [Cl.uint(jobId), Cl.stringAscii(proposalHash)],
     callbacks,
   );
 }
@@ -143,7 +140,7 @@ export function assignFreelancer(
 ) {
   contractCall(
     "assign-freelancer",
-    [uintCV(jobId), principalCV(freelancer)],
+    [Cl.uint(jobId), Cl.principal(freelancer)],
     callbacks,
   );
 }
@@ -155,7 +152,7 @@ export function submitWork(
 ) {
   contractCall(
     "submit-work",
-    [uintCV(jobId), stringAsciiCV(submissionHash)],
+    [Cl.uint(jobId), Cl.stringAscii(submissionHash)],
     callbacks,
   );
 }
@@ -178,7 +175,7 @@ export function approveWork(
     contractAddress: CONTRACT_ADDRESS,
     contractName: CONTRACT_NAME,
     functionName: "approve-work",
-    functionArgs: [uintCV(jobId)],
+    functionArgs: [Cl.uint(jobId)],
     network: getNetwork(),
     postConditions,
     onFinish: callbacks.onFinish,
@@ -187,7 +184,7 @@ export function approveWork(
 }
 
 export function raiseDispute(jobId: number, callbacks: TxCallbacks) {
-  contractCall("raise-dispute", [uintCV(jobId)], callbacks);
+  contractCall("raise-dispute", [Cl.uint(jobId)], callbacks);
 }
 
 export function resolveDispute(
@@ -209,7 +206,7 @@ export function resolveDispute(
     contractAddress: CONTRACT_ADDRESS,
     contractName: CONTRACT_NAME,
     functionName: "resolve-dispute",
-    functionArgs: [uintCV(jobId), boolCV(payFreelancer)],
+    functionArgs: [Cl.uint(jobId), Cl.bool(payFreelancer)],
     network: getNetwork(),
     postConditions,
     onFinish: callbacks.onFinish,
