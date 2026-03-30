@@ -4,6 +4,7 @@ import WalletConnect from "@/components/WalletConnect";
 import { Separator } from "@/components/ui/separator";
 import { SearchNormal1 } from "iconsax-react";
 import Link from "next/link";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "StacksLance — Freelance on Stacks",
@@ -56,6 +57,7 @@ export default function RootLayout({
         </header>
 
         <main>{children}</main>
+        <Toaster richColors position="top-right" />
 
         <Separator className="mt-20" />
         <footer className="py-10 bg-muted/30">

@@ -6,6 +6,8 @@ import {
   principalCV,
   boolCV,
   ClarityValue,
+  makeStandardSTXPostCondition,
+  FungibleConditionCode,
 } from "@stacks/transactions";
 import { openContractCall } from "@stacks/connect";
 import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK } from "./constants";
@@ -100,12 +102,25 @@ export function createJob(
   descriptionHash: string,
   amountMicroStx: number,
   callbacks: TxCallbacks,
+  senderAddress: string,
 ) {
-  contractCall(
-    "create-job",
-    [stringAsciiCV(descriptionHash), uintCV(amountMicroStx)],
-    callbacks,
-  );
+  const postConditions = [
+    makeStandardSTXPostCondition(
+      senderAddress,
+      FungibleConditionCode.Equal,
+      BigInt(amountMicroStx),
+    ),
+  ];
+  openContractCall({
+    contractAddress: CONTRACT_ADDRESS,
+    contractName: CONTRACT_NAME,
+    functionName: "create-job",
+    functionArgs: [stringAsciiCV(descriptionHash), uintCV(amountMicroStx)],
+    network: getNetwork(),
+    postConditions,
+    onFinish: callbacks.onFinish,
+    onCancel: callbacks.onCancel,
+  });
 }
 
 export function applyToJob(

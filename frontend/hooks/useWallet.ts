@@ -4,29 +4,29 @@ import {
   connect,
   disconnect as stacksDisconnect,
   isConnected,
-  getOrCreateUserSession,
+  getLocalStorage,
 } from "@stacks/connect";
-import { NETWORK } from "@/lib/constants";
 
-function getAddress(): string | null {
-  try {
-    const session = getOrCreateUserSession();
-    if (!session.isUserSignedIn()) return null;
-    const profile = session.loadUserData();
-    return NETWORK === "mainnet"
-      ? profile.profile.stxAddress.mainnet
-      : profile.profile.stxAddress.testnet;
-  } catch {
-    return null;
+const getAddress = (): string | null => {
+  const userData = getLocalStorage();
+  if (userData?.addresses) {
+    const stxAddress = userData.addresses.stx[0].address;
+    console.log("STX:", stxAddress);
+    return stxAddress;
   }
-}
+  return null;
+};
 
 export function useWallet() {
   const [address, setAddress] = useState<string | null>(getAddress);
+  const authenticated = isConnected();
 
   const connectWallet = useCallback(async () => {
-    if (isConnected()) return;
-    await connect();
+    if (isConnected()) {
+      console.log("Already authenticated");
+      return;
+    }
+    const response = await connect();
     setAddress(getAddress());
   }, []);
 
@@ -39,6 +39,6 @@ export function useWallet() {
     address,
     connect: connectWallet,
     disconnect: disconnectWallet,
-    isConnected: !!address,
+    isConnected: authenticated,
   };
 }

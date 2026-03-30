@@ -47,7 +47,7 @@ export function useJobs() {
   useEffect(() => {
     async function load() {
       try {
-        const count = await getJobCount();
+        const count = Number(await getJobCount());
         const results = await Promise.all(
           Array.from({ length: count }, (_, i) =>
             getJob(i + 1).then(async (raw) => {

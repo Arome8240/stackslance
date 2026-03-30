@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useWallet } from "@/hooks/useWallet";
 import { uploadToIPFS } from "@/lib/ipfs";
 import { createJob } from "@/lib/contract";
-import TxStatus from "@/components/TxStatus";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,12 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ArrowRight2, Briefcase, Lock1, TickCircle } from "iconsax-react";
-
-type TxState = {
-  status: "idle" | "pending" | "success" | "error";
-  txId?: string;
-  error?: string;
-};
+import { toast } from "sonner";
 
 const HOW_IT_WORKS = [
   "Post your job — details go to IPFS",
@@ -34,8 +28,8 @@ export default function CreateJobPage() {
   const [description, setDescription] = useState("");
   const [skills, setSkills] = useState("");
   const [budget, setBudget] = useState("");
-  const [tx, setTx] = useState<TxState>({ status: "idle" });
   const [uploading, setUploading] = useState(false);
+  const [pending, setPending] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -56,21 +50,39 @@ export default function CreateJobPage() {
         createdAt: new Date().toISOString(),
       });
       setUploading(false);
-      setTx({ status: "pending" });
-      createJob(cid, Math.floor(amountStx * 1_000_000), {
-        onFinish: ({ txId }) => {
-          setTx({ status: "success", txId });
-          setTimeout(() => router.push("/"), 2500);
+      setPending(true);
+      createJob(
+        cid,
+        Math.floor(amountStx * 1_000_000),
+        {
+          onFinish: ({ txId }) => {
+            setPending(false);
+            toast.success("Job posted!", {
+              description: (
+                <a
+                  href={`https://explorer.hiro.so/txid/${txId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline"
+                >
+                  View on Explorer
+                </a>
+              ),
+            });
+            setTimeout(() => router.push("/"), 2500);
+          },
+          onCancel: () => setPending(false),
         },
-        onCancel: () => setTx({ status: "idle" }),
-      });
+        address!,
+      );
     } catch (err) {
       setUploading(false);
-      setTx({ status: "error", error: (err as Error).message });
+      setPending(false);
+      toast.error("Failed", { description: (err as Error).message });
     }
   }
 
-  const busy = uploading || tx.status === "pending";
+  const busy = uploading || pending;
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
@@ -171,7 +183,7 @@ export default function CreateJobPage() {
                 </>
               ) : uploading ? (
                 "Uploading to IPFS..."
-              ) : tx.status === "pending" ? (
+              ) : pending ? (
                 "Confirm in Hiro Wallet..."
               ) : (
                 <>
@@ -179,8 +191,6 @@ export default function CreateJobPage() {
                 </>
               )}
             </Button>
-
-            <TxStatus {...tx} />
           </form>
         </div>
 
