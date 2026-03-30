@@ -27,32 +27,36 @@ export type Job = {
   meta?: JobMeta;
 };
 
+function cv(val: unknown): unknown {
+  if (val && typeof val === "object" && "value" in val) {
+    return (val as { value: unknown }).value;
+  }
+  return val;
+}
+
 function parsePrincipal(val: unknown): string | null {
-  if (!val) return null;
-  if (typeof val === "string") return val;
-  if (typeof val === "object" && val !== null && "address" in val)
-    return (val as { address: string }).address;
+  const unwrapped = cv(val);
+  if (!unwrapped) return null;
+  if (typeof unwrapped === "string") return unwrapped;
+  if (
+    typeof unwrapped === "object" &&
+    unwrapped !== null &&
+    "address" in unwrapped
+  )
+    return (unwrapped as { address: string }).address;
   return null;
 }
 
 function parseJob(id: number, raw: Record<string, unknown>): Job {
-  const descriptionHash =
-    (raw["description-hash"] as string) ??
-    (raw["descriptionHash"] as string) ??
-    "";
-  const submissionHash =
-    (raw["submission-hash"] as string) ??
-    (raw["submissionHash"] as string) ??
-    null;
   return {
     id,
     client: parsePrincipal(raw.client) ?? "",
     freelancer: parsePrincipal(raw.freelancer),
-    amount: Number(raw.amount),
-    status: Number(raw.status),
-    descriptionHash,
-    submissionHash,
-    createdAt: Number(raw["created-at"] ?? raw["createdAt"] ?? 0),
+    amount: Number(cv(raw.amount)),
+    status: Number(cv(raw.status)),
+    descriptionHash: (cv(raw["description-hash"]) as string) ?? "",
+    submissionHash: (cv(raw["submission-hash"]) as string) ?? null,
+    createdAt: Number(cv(raw["created-at"]) ?? 0),
   };
 }
 
@@ -102,10 +106,15 @@ export function useJob(id: number) {
       try {
         const raw = await getJob(id);
         if (!raw) return;
+        console.log("[useJob] raw", JSON.stringify(raw));
         const parsed = parseJob(id, raw as Record<string, unknown>);
+        console.log("[useJob] parsed", parsed);
         try {
           parsed.meta = await fetchFromIPFS<JobMeta>(parsed.descriptionHash);
-        } catch {}
+          console.log("[useJob] meta", parsed.meta);
+        } catch (e) {
+          console.error("[useJob] IPFS error", e);
+        }
         setJob(parsed);
       } finally {
         setLoading(false);
