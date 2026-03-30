@@ -1,4 +1,5 @@
 "use client";
+import { TickCircle, CloseCircle, Timer1 } from "iconsax-react";
 
 type Status = "idle" | "pending" | "success" | "error";
 type Props = { status: Status; txId?: string; error?: string };
@@ -19,28 +20,24 @@ export default function TxStatus({ status, txId, error }: Props) {
   return (
     <div className={styles}>
       {status === "pending" && (
-        <svg
-          className="animate-spin h-4 w-4 shrink-0"
-          viewBox="0 0 24 24"
-          fill="none"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v8z"
-          />
-        </svg>
+        <Timer1 size={16} color="#3b82f6" className="shrink-0 animate-pulse" />
       )}
-      {status === "success" && <span className="shrink-0 font-bold">✓</span>}
-      {status === "error" && <span className="shrink-0 font-bold">✕</span>}
+      {status === "success" && (
+        <TickCircle
+          size={16}
+          color="#16a34a"
+          variant="Bold"
+          className="shrink-0"
+        />
+      )}
+      {status === "error" && (
+        <CloseCircle
+          size={16}
+          color="#dc2626"
+          variant="Bold"
+          className="shrink-0"
+        />
+      )}
       <span>
         {status === "pending" && "Waiting for confirmation..."}
         {status === "success" && (

@@ -19,6 +19,19 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
+import {
+  ArrowRight2,
+  Profile2User,
+  Link21,
+  MoneyRecive,
+  TickCircle,
+  Warning2,
+  InfoCircle,
+  Send2,
+  UserAdd,
+  DocumentUpload,
+  Lock1,
+} from "iconsax-react";
 import { JOB_STATUS, IPFS_GATEWAY } from "@/lib/constants";
 
 type TxState = {
@@ -71,7 +84,7 @@ export default function JobDetailPage({
   if (!job) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-20 text-center text-muted-foreground">
-        <p className="text-5xl mb-4">🔍</p>
+        <InfoCircle size={48} color="#9ca3af" className="mx-auto mb-4" />
         <p className="text-lg font-semibold text-foreground">Job not found</p>
       </div>
     );
@@ -137,22 +150,22 @@ export default function JobDetailPage({
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
-      {/* Breadcrumb */}
-      <p className="text-sm text-muted-foreground mb-6">
+      <p className="text-sm text-muted-foreground mb-6 flex items-center gap-1.5">
         <span
           className="text-primary cursor-pointer hover:underline"
           onClick={() => router.push("/")}
         >
           Home
         </span>
-        {" / "}
+        <ArrowRight2 size={12} color="#9ca3af" />
         <span
           className="text-primary cursor-pointer hover:underline"
           onClick={() => router.push("/")}
         >
           Jobs
         </span>
-        {" / "}Job #{job.id}
+        <ArrowRight2 size={12} color="#9ca3af" />
+        Job #{job.id}
       </p>
 
       <div className="grid lg:grid-cols-3 gap-10">
@@ -175,7 +188,10 @@ export default function JobDetailPage({
           {job.meta?.description && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">About this job</CardTitle>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <InfoCircle size={16} color="#1d4ed8" variant="Bold" /> About
+                  this job
+                </CardTitle>
               </CardHeader>
               <Separator />
               <CardContent className="pt-4">
@@ -189,7 +205,10 @@ export default function JobDetailPage({
           {job.meta?.skills && job.meta.skills.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Skills Required</CardTitle>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <DocumentUpload size={16} color="#7c3aed" variant="Bold" />{" "}
+                  Skills Required
+                </CardTitle>
               </CardHeader>
               <Separator />
               <CardContent className="pt-4 flex flex-wrap gap-2">
@@ -208,33 +227,42 @@ export default function JobDetailPage({
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">On-chain Details</CardTitle>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Link21 size={16} color="#0ea5e9" variant="Bold" /> On-chain
+                Details
+              </CardTitle>
             </CardHeader>
             <Separator />
             <CardContent className="pt-4">
               <dl className="space-y-3 text-sm">
-                {[
+                {(
                   [
-                    "Client",
-                    `${job.client.slice(0, 10)}...${job.client.slice(-6)}`,
-                  ],
-                  job.freelancer
-                    ? [
-                        "Freelancer",
-                        `${job.freelancer.slice(0, 10)}...${job.freelancer.slice(-6)}`,
-                      ]
-                    : null,
-                  ["Applicants", String(applicantCount)],
-                ]
+                    [
+                      "Client",
+                      `${job.client.slice(0, 10)}...${job.client.slice(-6)}`,
+                    ],
+                    job.freelancer
+                      ? [
+                          "Freelancer",
+                          `${job.freelancer.slice(0, 10)}...${job.freelancer.slice(-6)}`,
+                        ]
+                      : null,
+                    ["Applicants", String(applicantCount)],
+                  ] as (string[] | null)[]
+                )
                   .filter(Boolean as unknown as (v: unknown) => v is string[])
                   .map(([k, v]) => (
                     <div key={k} className="flex justify-between">
-                      <dt className="text-muted-foreground">{k}</dt>
+                      <dt className="text-muted-foreground flex items-center gap-1.5">
+                        <Profile2User size={13} color="#6b7280" /> {k}
+                      </dt>
                       <dd className="font-mono font-medium">{v}</dd>
                     </div>
                   ))}
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Description IPFS</dt>
+                  <dt className="text-muted-foreground flex items-center gap-1.5">
+                    <Link21 size={13} color="#6b7280" /> Description IPFS
+                  </dt>
                   <dd>
                     <a
                       href={`${IPFS_GATEWAY}/${job.descriptionHash}`}
@@ -248,7 +276,9 @@ export default function JobDetailPage({
                 </div>
                 {job.submissionHash && (
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Submission IPFS</dt>
+                    <dt className="text-muted-foreground flex items-center gap-1.5">
+                      <Link21 size={13} color="#6b7280" /> Submission IPFS
+                    </dt>
                     <dd>
                       <a
                         href={`${IPFS_GATEWAY}/${job.submissionHash}`}
@@ -270,15 +300,20 @@ export default function JobDetailPage({
         <div className="space-y-4">
           <Card>
             <CardContent className="pt-6">
-              <p className="text-3xl font-black text-primary">{stx} STX</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Locked in escrow
+              <div className="flex items-center gap-2 mb-1">
+                <MoneyRecive size={22} color="#1d4ed8" variant="Bold" />
+                <p className="text-3xl font-black text-primary">{stx} STX</p>
+              </div>
+              <p className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
+                <Lock1 size={11} color="#6b7280" /> Locked in escrow
               </p>
 
               {/* Apply */}
               {job.status === 0 && !isJobClient && !hasApplied && (
                 <form onSubmit={handleApply} className="mt-5 space-y-3">
-                  <Label>Your Proposal</Label>
+                  <Label className="flex items-center gap-1.5">
+                    <Send2 size={13} color="#1d4ed8" /> Your Proposal
+                  </Label>
                   <Textarea
                     required
                     rows={4}
@@ -287,7 +322,13 @@ export default function JobDetailPage({
                     placeholder="Describe your approach and relevant experience..."
                     className="resize-none"
                   />
-                  <Button type="submit" disabled={busy} className="w-full">
+                  <Button
+                    type="submit"
+                    disabled={busy}
+                    className="w-full gap-2"
+                    size="lg"
+                  >
+                    <Send2 size={15} color="white" />
                     {!isConnected
                       ? "Connect Wallet"
                       : uploading
@@ -301,15 +342,18 @@ export default function JobDetailPage({
               )}
 
               {hasApplied && job.status === 0 && (
-                <div className="mt-4 bg-primary/5 border border-primary/20 rounded-lg p-3 text-xs text-primary font-medium">
-                  ✓ Proposal submitted — waiting for client to assign
+                <div className="mt-4 bg-primary/5 border border-primary/20 rounded-lg p-3 text-xs text-primary font-medium flex items-center gap-2">
+                  <TickCircle size={14} color="#1d4ed8" variant="Bold" />
+                  Proposal submitted — waiting for client to assign
                 </div>
               )}
 
               {/* Assign */}
               {job.status === 0 && isJobClient && (
                 <form onSubmit={handleAssign} className="mt-5 space-y-3">
-                  <Label>Assign a Freelancer</Label>
+                  <Label className="flex items-center gap-1.5">
+                    <UserAdd size={13} color="#1d4ed8" /> Assign a Freelancer
+                  </Label>
                   <Input
                     required
                     value={freelancerAddr}
@@ -317,7 +361,13 @@ export default function JobDetailPage({
                     placeholder="SP... wallet address"
                     className="font-mono text-xs"
                   />
-                  <Button type="submit" disabled={busy} className="w-full">
+                  <Button
+                    type="submit"
+                    disabled={busy}
+                    className="w-full gap-2"
+                    size="lg"
+                  >
+                    <UserAdd size={15} color="white" />
                     {busy ? "Confirm in wallet..." : "Assign Freelancer"}
                   </Button>
                   <TxStatus {...tx} />
@@ -327,7 +377,10 @@ export default function JobDetailPage({
               {/* Submit work */}
               {job.status === 1 && isJobFreelancer && (
                 <form onSubmit={handleSubmitWork} className="mt-5 space-y-3">
-                  <Label>Submit Your Work</Label>
+                  <Label className="flex items-center gap-1.5">
+                    <DocumentUpload size={13} color="#7c3aed" /> Submit Your
+                    Work
+                  </Label>
                   <Textarea
                     required
                     rows={4}
@@ -336,7 +389,13 @@ export default function JobDetailPage({
                     placeholder="Describe your deliverable, add links or notes..."
                     className="resize-none"
                   />
-                  <Button type="submit" disabled={busy} className="w-full">
+                  <Button
+                    type="submit"
+                    disabled={busy}
+                    className="w-full gap-2"
+                    size="lg"
+                  >
+                    <DocumentUpload size={15} color="white" />
                     {uploading
                       ? "Uploading..."
                       : busy
@@ -352,27 +411,31 @@ export default function JobDetailPage({
                 <div className="mt-5 space-y-3">
                   <p className="text-sm font-semibold">Review Submission</p>
                   <Button
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    size="lg"
+                    className="w-full gap-2 bg-green-600 hover:bg-green-700 text-white"
                     disabled={busy}
                     onClick={() => {
                       setTx({ status: "pending" });
                       approveWork(jobId, callbacks());
                     }}
                   >
+                    <TickCircle size={16} color="white" variant="Bold" />
                     {busy
                       ? "Confirm in wallet..."
                       : "Approve & Release Payment"}
                   </Button>
                   <Button
+                    size="lg"
                     variant="destructive"
-                    className="w-full"
+                    className="w-full gap-2"
                     disabled={busy}
                     onClick={() => {
                       setTx({ status: "pending" });
                       raiseDispute(jobId, callbacks());
                     }}
                   >
-                    Raise Dispute
+                    <Warning2 size={16} color="white" variant="Bold" /> Raise
+                    Dispute
                   </Button>
                   <TxStatus {...tx} />
                 </div>
@@ -380,37 +443,42 @@ export default function JobDetailPage({
 
               {job.status === 2 && isJobFreelancer && (
                 <div className="mt-5 space-y-3">
-                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-xs text-primary">
+                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 text-xs text-primary flex items-center gap-2">
+                    <InfoCircle size={13} color="#1d4ed8" variant="Bold" />
                     Work submitted — awaiting client approval
                   </div>
                   <Button
+                    size="lg"
                     variant="destructive"
-                    className="w-full"
+                    className="w-full gap-2"
                     disabled={busy}
                     onClick={() => {
                       setTx({ status: "pending" });
                       raiseDispute(jobId, callbacks());
                     }}
                   >
-                    Raise Dispute
+                    <Warning2 size={16} color="white" variant="Bold" /> Raise
+                    Dispute
                   </Button>
                   <TxStatus {...tx} />
                 </div>
               )}
 
               {job.status === 3 && (
-                <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-700 font-medium text-center">
-                  ✓ Completed — payment released
+                <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-700 font-medium flex items-center gap-2">
+                  <TickCircle size={15} color="#16a34a" variant="Bold" />{" "}
+                  Completed — payment released
                 </div>
               )}
               {job.status === 4 && (
-                <div className="mt-4 bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-sm text-destructive font-medium text-center">
-                  ⚠ Disputed — awaiting arbitration
+                <div className="mt-4 bg-destructive/5 border border-destructive/20 rounded-lg p-3 text-sm text-destructive font-medium flex items-center gap-2">
+                  <Warning2 size={15} color="#dc2626" variant="Bold" /> Disputed
+                  — awaiting arbitration
                 </div>
               )}
               {job.status === 5 && (
-                <div className="mt-4 bg-muted border rounded-lg p-3 text-sm text-muted-foreground font-medium text-center">
-                  Resolved
+                <div className="mt-4 bg-muted border rounded-lg p-3 text-sm text-muted-foreground font-medium flex items-center gap-2">
+                  <InfoCircle size={15} color="#6b7280" /> Resolved
                 </div>
               )}
             </CardContent>
@@ -418,7 +486,10 @@ export default function JobDetailPage({
 
           <Card>
             <CardContent className="pt-5">
-              <p className="font-semibold text-sm mb-2">About the Client</p>
+              <p className="font-semibold text-sm mb-2 flex items-center gap-2">
+                <Profile2User size={15} color="#1d4ed8" variant="Bold" /> About
+                the Client
+              </p>
               <p className="font-mono text-xs text-muted-foreground break-all">
                 {job.client}
               </p>

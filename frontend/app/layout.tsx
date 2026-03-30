@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import WalletConnect from "@/components/WalletConnect";
 import { Separator } from "@/components/ui/separator";
+import { SearchNormal1 } from "iconsax-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -35,8 +36,8 @@ export default function RootLayout({
                   placeholder="Search for any service..."
                   className="flex-1 px-4 py-2 text-sm bg-background outline-none"
                 />
-                <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 text-sm font-medium transition-colors">
-                  Search
+                <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 transition-colors flex items-center">
+                  <SearchNormal1 color="white" size={16} />
                 </button>
               </div>
             </div>
