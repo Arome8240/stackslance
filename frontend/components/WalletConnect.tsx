@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import { useWallet } from "@/hooks/useWallet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +7,22 @@ import { Wallet, LogoutCurve } from "iconsax-react";
 
 export default function WalletConnect() {
   const { address, connect, disconnect, isConnected } = useWallet();
+  const [mounted, setMounted] = useState(false);
   const short = (a: string) => `${a.slice(0, 6)}...${a.slice(-4)}`;
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <Button size="lg" className="gap-2" disabled>
+        <Wallet size={16} color="white" />
+        Connect Wallet
+      </Button>
+    );
+  }
 
   if (isConnected) {
     return (

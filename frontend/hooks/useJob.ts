@@ -27,16 +27,32 @@ export type Job = {
   meta?: JobMeta;
 };
 
+function parsePrincipal(val: unknown): string | null {
+  if (!val) return null;
+  if (typeof val === "string") return val;
+  if (typeof val === "object" && val !== null && "address" in val)
+    return (val as { address: string }).address;
+  return null;
+}
+
 function parseJob(id: number, raw: Record<string, unknown>): Job {
+  const descriptionHash =
+    (raw["description-hash"] as string) ??
+    (raw["descriptionHash"] as string) ??
+    "";
+  const submissionHash =
+    (raw["submission-hash"] as string) ??
+    (raw["submissionHash"] as string) ??
+    null;
   return {
     id,
-    client: raw.client as string,
-    freelancer: (raw.freelancer as string) ?? null,
+    client: parsePrincipal(raw.client) ?? "",
+    freelancer: parsePrincipal(raw.freelancer),
     amount: Number(raw.amount),
     status: Number(raw.status),
-    descriptionHash: raw["description-hash"] as string,
-    submissionHash: (raw["submission-hash"] as string) ?? null,
-    createdAt: Number(raw["created-at"]),
+    descriptionHash,
+    submissionHash,
+    createdAt: Number(raw["created-at"] ?? raw["createdAt"] ?? 0),
   };
 }
 
@@ -58,6 +74,7 @@ export function useJobs() {
               } catch {
                 // IPFS fetch failed — show without meta
               }
+              //console.log("Jobs", job);
               return job;
             }),
           ),

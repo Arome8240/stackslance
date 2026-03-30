@@ -73,7 +73,9 @@ export default function JobCard({ job }: Props) {
         <CardFooter className="px-4 py-3 border-t flex items-center justify-between">
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-mono">
             <Profile2User size={13} color="#6b7280" />
-            {job.client.slice(0, 6)}...{job.client.slice(-4)}
+            {job.client
+              ? `${job.client.slice(0, 6)}...${job.client.slice(-4)}`
+              : "Unknown"}
           </span>
           <span className="flex items-center gap-1 text-xs text-primary font-semibold group-hover:underline">
             View <ArrowRight2 size={13} color="#1d4ed8" />

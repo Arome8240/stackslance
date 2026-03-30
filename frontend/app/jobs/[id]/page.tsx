@@ -265,12 +265,16 @@ export default function JobDetailPage({
                   </dt>
                   <dd>
                     <a
-                      href={`${IPFS_GATEWAY}/${job.descriptionHash}`}
+                      href={
+                        job.descriptionHash
+                          ? `${IPFS_GATEWAY}/${job.descriptionHash}`
+                          : "#"
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:underline text-xs font-mono"
                     >
-                      {job.descriptionHash.slice(0, 16)}...
+                      {job.descriptionHash?.slice(0, 16) ?? "N/A"}...
                     </a>
                   </dd>
                 </div>
