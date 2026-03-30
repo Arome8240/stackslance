@@ -12,12 +12,12 @@ export const JOB_STATUS: Record<number, string> = {
 };
 
 export const STATUS_COLORS: Record<number, string> = {
-  0: "bg-blue-100 text-blue-800",
-  1: "bg-yellow-100 text-yellow-800",
-  2: "bg-purple-100 text-purple-800",
-  3: "bg-green-100 text-green-800",
-  4: "bg-red-100 text-red-800",
-  5: "bg-gray-100 text-gray-800",
+  0: "bg-blue-100 text-blue-700",
+  1: "bg-yellow-100 text-yellow-700",
+  2: "bg-purple-100 text-purple-700",
+  3: "bg-green-100 text-green-700",
+  4: "bg-red-100 text-red-700",
+  5: "bg-gray-100 text-gray-600",
 };
 
 export const IPFS_GATEWAY = "https://ipfs.io/ipfs";
