@@ -6,7 +6,7 @@
 ;; -----------------------------------------------
 ;; Constants
 ;; -----------------------------------------------
-(define-constant ARBITRATOR 'SP000000000000000000002Q6VF78) ;; replace with real arbitrator address
+(define-constant ARBITRATOR 'SP25H46Z9YCAB1TW93YG42WM0SREG9SC5EZB977TJ) ;; replace with real arbitrator address
 
 (define-constant ERR-NOT-FOUND          (err u100))
 (define-constant ERR-UNAUTHORIZED       (err u101))

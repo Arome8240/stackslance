@@ -52,6 +52,12 @@ frontend/next-env.d.ts
 .LSOverride
 Thumbs.db
 
+# ── Sensitive / deployment ────────────────────
+settings/Mainnet.toml
+settings/Testnet.toml
+deployments/default.mainnet-plan.yaml
+deployments/default.testnet-plan.yaml
+
 # ── Misc ──────────────────────────────────────
 *.pem
 npm-debug.log*

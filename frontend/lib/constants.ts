@@ -1,6 +1,6 @@
-export const CONTRACT_ADDRESS = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"; // replace with deployed address
+export const CONTRACT_ADDRESS = "SP25H46Z9YCAB1TW93YG42WM0SREG9SC5EZB977TJ";
 export const CONTRACT_NAME = "freelance-marketplace";
-export const NETWORK: "mainnet" | "testnet" | "devnet" = "devnet";
+export const NETWORK: "mainnet" | "testnet" | "devnet" = "mainnet";
 
 export const JOB_STATUS: Record<number, string> = {
   0: "Open",
