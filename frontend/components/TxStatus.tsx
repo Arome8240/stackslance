@@ -8,16 +8,16 @@ const EXPLORER = "https://explorer.hiro.so/txid";
 export default function TxStatus({ status, txId, error }: Props) {
   if (status === "idle") return null;
 
+  const base =
+    "flex items-center gap-2.5 text-sm rounded-lg border px-4 py-3 mt-3";
   const styles = {
-    pending: "bg-blue-50 border-blue-200 text-blue-800",
-    success: "bg-green-50 border-green-200 text-green-800",
-    error: "bg-red-50 border-red-200 text-red-700",
+    pending: `${base} bg-primary/5 border-primary/20 text-primary`,
+    success: `${base} bg-green-50 border-green-200 text-green-700`,
+    error: `${base} bg-destructive/5 border-destructive/20 text-destructive`,
   }[status];
 
   return (
-    <div
-      className={`flex items-center gap-2.5 text-sm border rounded-xl-xl px-4 py-3 mt-3 ${styles}`}
-    >
+    <div className={styles}>
       {status === "pending" && (
         <svg
           className="animate-spin h-4 w-4 shrink-0"
@@ -39,9 +39,8 @@ export default function TxStatus({ status, txId, error }: Props) {
           />
         </svg>
       )}
-      {status === "success" && <span className="shrink-0">✓</span>}
-      {status === "error" && <span className="shrink-0">✕</span>}
-
+      {status === "success" && <span className="shrink-0 font-bold">✓</span>}
+      {status === "error" && <span className="shrink-0 font-bold">✕</span>}
       <span>
         {status === "pending" && "Waiting for confirmation..."}
         {status === "success" && (

@@ -1,67 +1,79 @@
 "use client";
 import Link from "next/link";
 import { Job } from "@/hooks/useJob";
-import { JOB_STATUS, STATUS_COLORS } from "@/lib/constants";
+import { JOB_STATUS } from "@/lib/constants";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+const STATUS_VARIANT: Record<
+  number,
+  "default" | "secondary" | "outline" | "destructive"
+> = {
+  0: "default",
+  1: "secondary",
+  2: "outline",
+  3: "secondary",
+  4: "destructive",
+  5: "outline",
+};
 
 type Props = { job: Job };
 
 export default function JobCard({ job }: Props) {
   const stx = (job.amount / 1_000_000).toFixed(2);
-  const statusLabel = JOB_STATUS[job.status] ?? "Unknown";
-  const statusColor = STATUS_COLORS[job.status] ?? "bg-gray-100 text-gray-600";
 
   return (
-    <Link href={`/jobs/${job.id}`}>
-      <div className="border border-gray-200 rounded-xl-xl overflow-hidden hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group bg-white h-full flex flex-col">
-        {/* Card header band */}
-        <div className="h-2 bg-blue-700 group-hover:bg-blue-600 transition-colors" />
-
-        <div className="p-4 flex flex-col flex-1 gap-3">
-          {/* Status + amount */}
-          <div className="flex items-center justify-between">
-            <span
-              className={`text-xs font-semibold px-2 py-0.5 rounded-xl-full ${statusColor}`}
+    <Link href={`/jobs/${job.id}`} className="group block h-full">
+      <Card className="h-full flex flex-col hover:shadow-md hover:border-primary/40 transition-all duration-200 overflow-hidden">
+        <div className="h-1 bg-primary group-hover:bg-primary/80 transition-colors" />
+        <CardHeader className="pb-2 pt-4 px-4">
+          <div className="flex items-start justify-between gap-2">
+            <Badge
+              variant={STATUS_VARIANT[job.status] ?? "outline"}
+              className="text-xs shrink-0"
             >
-              {statusLabel}
-            </span>
-            <span className="text-sm font-bold text-blue-700">{stx} STX</span>
+              {JOB_STATUS[job.status] ?? "Unknown"}
+            </Badge>
+            <span className="text-sm font-bold text-primary">{stx} STX</span>
           </div>
-
-          {/* Title */}
-          <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">
+          <h3 className="font-semibold text-sm leading-snug line-clamp-2 group-hover:text-primary transition-colors mt-1">
             {job.meta?.title ?? `Job #${job.id}`}
           </h3>
+        </CardHeader>
 
-          {/* Description */}
-          <p className="text-xs text-gray-500 line-clamp-2 flex-1">
+        <CardContent className="px-4 pb-3 flex-1">
+          <p className="text-xs text-muted-foreground line-clamp-2">
             {job.meta?.description ?? "No description available."}
           </p>
-
-          {/* Skills */}
           {job.meta?.skills && job.meta.skills.length > 0 && (
-            <div className="flex gap-1.5 flex-wrap">
+            <div className="flex gap-1.5 flex-wrap mt-3">
               {job.meta.skills.slice(0, 3).map((s) => (
-                <span
+                <Badge
                   key={s}
-                  className="text-xs bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 rounded-xl-full"
+                  variant="secondary"
+                  className="text-xs font-normal"
                 >
                   {s}
-                </span>
+                </Badge>
               ))}
             </div>
           )}
+        </CardContent>
 
-          {/* Footer */}
-          <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
-            <span className="text-xs text-gray-400 font-mono">
-              {job.client.slice(0, 6)}...{job.client.slice(-4)}
-            </span>
-            <span className="text-xs text-blue-700 font-semibold group-hover:underline">
-              View Job →
-            </span>
-          </div>
-        </div>
-      </div>
+        <CardFooter className="px-4 py-3 border-t flex items-center justify-between">
+          <span className="text-xs text-muted-foreground font-mono">
+            {job.client.slice(0, 6)}...{job.client.slice(-4)}
+          </span>
+          <span className="text-xs text-primary font-semibold group-hover:underline">
+            View →
+          </span>
+        </CardFooter>
+      </Card>
     </Link>
   );
 }

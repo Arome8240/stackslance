@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import WalletConnect from "@/components/WalletConnect";
+import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -16,38 +17,34 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-white text-[#404145]">
-        {/* Top nav */}
-        <header className="border-b border-gray-200 bg-white sticky top-0 z-50">
+      <body className="min-h-screen bg-background text-foreground antialiased">
+        <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
           <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
-            {/* Logo */}
             <Link
               href="/"
-              className="text-2xl font-black tracking-tight text-blue-700"
+              className="text-xl font-black tracking-tight text-primary"
             >
-              stacks<span className="text-gray-900">lance</span>
-              <span className="text-blue-700">.</span>
+              stacks<span className="text-foreground">lance</span>
+              <span className="text-primary">.</span>
             </Link>
 
-            {/* Search */}
-            <div className="hidden md:flex flex-1 max-w-xl">
-              <div className="flex w-full border border-gray-900 rounded-xl overflow-hidden">
+            <div className="hidden md:flex flex-1 max-w-md">
+              <div className="flex w-full rounded-lg border overflow-hidden focus-within:ring-2 focus-within:ring-ring">
                 <input
                   type="text"
                   placeholder="Search for any service..."
-                  className="flex-1 px-4 py-2 text-sm outline-none text-gray-700"
+                  className="flex-1 px-4 py-2 text-sm bg-background outline-none"
                 />
-                <button className="bg-gray-900 hover:bg-gray-700 text-white px-4 text-sm font-medium transition-colors">
+                <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 text-sm font-medium transition-colors">
                   Search
                 </button>
               </div>
             </div>
 
-            {/* Nav links */}
-            <nav className="hidden md:flex items-center gap-5 text-sm text-gray-700">
+            <nav className="hidden md:flex items-center gap-1">
               <Link
                 href="/jobs/create"
-                className="hover:text-blue-700 transition-colors font-medium"
+                className="text-sm text-muted-foreground hover:text-foreground px-3 py-2 rounded-md hover:bg-accent transition-colors font-medium"
               >
                 Post a Job
               </Link>
@@ -57,14 +54,12 @@ export default function RootLayout({
           </div>
         </header>
 
-        {children}
+        <main>{children}</main>
 
-        {/* Footer */}
-        <footer className="border-t border-gray-200 mt-20 py-10 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-6 text-center text-sm text-gray-400">
-            <p className="font-black text-lg text-blue-700 mb-2">
-              stackslance.
-            </p>
+        <Separator className="mt-20" />
+        <footer className="py-10 bg-muted/30">
+          <div className="max-w-7xl mx-auto px-6 text-center text-sm text-muted-foreground">
+            <p className="font-black text-lg text-primary mb-1">stackslance.</p>
             <p>Decentralized freelance marketplace on Stacks blockchain.</p>
           </div>
         </footer>
