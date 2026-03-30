@@ -10,7 +10,7 @@ import {
   FungibleConditionCode,
 } from "@stacks/transactions";
 import { openContractCall } from "@stacks/connect";
-import { CONTRACT_ADDRESS, CONTRACT_NAME, NETWORK } from "./constants";
+import { CONTRACT_ADDRESS, CONTRACT_NAME } from "./constants";
 import { getNetwork } from "./network";
 
 // -----------------------------------------------
