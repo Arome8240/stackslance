@@ -1,44 +1,44 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
-import { showConnect, UserSession, AppConfig } from "@stacks/connect";
+import { useState, useCallback } from "react";
+import {
+  connect,
+  disconnect as stacksDisconnect,
+  isConnected,
+  getOrCreateUserSession,
+} from "@stacks/connect";
 import { NETWORK } from "@/lib/constants";
 
-const appConfig = new AppConfig(["store_write", "publish_data"]);
-export const userSession = new UserSession({ appConfig });
+function getAddress(): string | null {
+  try {
+    const session = getOrCreateUserSession();
+    if (!session.isUserSignedIn()) return null;
+    const profile = session.loadUserData();
+    return NETWORK === "mainnet"
+      ? profile.profile.stxAddress.mainnet
+      : profile.profile.stxAddress.testnet;
+  } catch {
+    return null;
+  }
+}
 
 export function useWallet() {
-  const [address, setAddress] = useState<string | null>(null);
+  const [address, setAddress] = useState<string | null>(getAddress);
 
-  useEffect(() => {
-    if (userSession.isUserSignedIn()) {
-      const profile = userSession.loadUserData();
-      const addr =
-        NETWORK === "mainnet"
-          ? profile.profile.stxAddress.mainnet
-          : profile.profile.stxAddress.testnet;
-      setAddress(addr);
-    }
+  const connectWallet = useCallback(async () => {
+    if (isConnected()) return;
+    await connect();
+    setAddress(getAddress());
   }, []);
 
-  const connect = useCallback(() => {
-    showConnect({
-      appDetails: { name: "StacksLance", icon: "/favicon.ico" },
-      userSession,
-      onFinish: () => {
-        const profile = userSession.loadUserData();
-        const addr =
-          NETWORK === "mainnet"
-            ? profile.profile.stxAddress.mainnet
-            : profile.profile.stxAddress.testnet;
-        setAddress(addr);
-      },
-    });
-  }, []);
-
-  const disconnect = useCallback(() => {
-    userSession.signUserOut();
+  const disconnectWallet = useCallback(() => {
+    stacksDisconnect();
     setAddress(null);
   }, []);
 
-  return { address, connect, disconnect, isConnected: !!address };
+  return {
+    address,
+    connect: connectWallet,
+    disconnect: disconnectWallet,
+    isConnected: !!address,
+  };
 }
